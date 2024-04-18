@@ -1,14 +1,16 @@
-# PyQt5 imports
-from PyQt5.QtWidgets import QMainWindow, QApplication, QToolBar, QAction, QLineEdit, QStatusBar, QMenu, QVBoxLayout, QWidget, QPushButton, QSizePolicy
+from PyQt5.QtWidgets import QMainWindow, QApplication, QToolBar, QAction, QLineEdit, QPushButton, QSizePolicy, QScrollBar
 from PyQt5.QtWebEngineWidgets import QWebEngineView
-from PyQt5.QtCore import QUrl, Qt
-from PyQt5.QtGui import QIcon
-# System import
+from PyQt5.QtCore import QUrl
+from PyQt5.QtGui import QIcon, QFont
 import sys
 
 class Window(QMainWindow):
     def __init__(self, *args, **kwargs):
         super(Window, self).__init__(*args, **kwargs)
+
+        # Load the custom font
+        font = QFont()
+        font.setFamily("Inter")  # Replace "YourCustomFont" with the actual font name
 
         self.setWindowTitle("PythonGeeks Web Browser")
         self.setWindowIcon(QIcon("./assets/browser_icon.png"))
@@ -16,14 +18,13 @@ class Window(QMainWindow):
         self.browser = QWebEngineView()
         self.browser.setUrl(QUrl('https://www.google.com'))
         self.browser.urlChanged.connect(self.update_AddressBar)
-        self.browser.loadStarted.connect(self.loading_started)
-        self.browser.loadFinished.connect(self.loading_finished)
         self.setCentralWidget(self.browser)
 
-        self.status_bar = QStatusBar()
-        self.setStatusBar(self.status_bar)
+        self.status_bar = self.statusBar()
+        self.status_bar.setVisible(False)
 
         self.navigation_bar = QToolBar('Navigation Toolbar')
+        self.navigation_bar.setMovable(False)  # Make the toolbar non-movable
         self.addToolBar(self.navigation_bar)
 
         back_button = QAction(QIcon("./assets/back_icon.png"), "Back", self)
@@ -46,8 +47,6 @@ class Window(QMainWindow):
         home_button.triggered.connect(self.go_to_home)
         self.navigation_bar.addAction(home_button)
 
-        self.navigation_bar.addSeparator()
-
         self.URLBar = QLineEdit()
         self.URLBar.returnPressed.connect(lambda: self.go_to_URL(QUrl(self.URLBar.text())))
         self.navigation_bar.addWidget(self.URLBar)
@@ -61,71 +60,59 @@ class Window(QMainWindow):
         # Add the toggle button to the toolbar
         self.navigation_bar.addWidget(self.toggle_button)
 
-        # Create Bookmarks button
-        self.bookmarks_button = QPushButton("Bookmarks")
-        self.bookmarks_button.clicked.connect(self.show_bookmarks_panel)
+        # Apply the custom font to the main window and toolbar
+        self.setFont(font)
+        self.navigation_bar.setFont(font)
 
-        # Layout for side panel
-        self.side_panel_layout = QVBoxLayout()
-        self.side_panel_layout.addWidget(self.bookmarks_button)
-
-        # Widget for side panel
-        self.side_panel_widget = QWidget()
-        self.side_panel_widget.setLayout(self.side_panel_layout)
-
-        # Create a new toolbar for the side panel
-        self.side_panel_toolbar = QToolBar('Side Panel')
-        self.side_panel_toolbar.addWidget(self.side_panel_widget)
-
-        # Add the side panel toolbar to the main window
-        self.addToolBar(Qt.RightToolBarArea, self.side_panel_toolbar)
-
-        # Initially hide the side panel
-        self.side_panel_toolbar.setVisible(False)
-
+        # Apply scrollbar styling
         self.setStyleSheet("""
             QMainWindow {
-                background-color: #f0f0f0;
-                font-family: Arial, sans-serif;
+                background-color: #ffffff;
             }
             QToolBar {
-                background-color: #f0f0f0;
+                background-color: #ffffff;
                 border: none;
-                spacing: 10px;
-            }
-            QToolBar::item {
-                padding: 0px;  /* Removed padding */
+                spacing: 8px;
+                padding-left: 8px;
+                padding-right: 8px;
             }
             QLineEdit {
-                background-color: #ffffff;
+                background-color: transparent;
                 border: 1px solid #ccc;
                 border-radius: 8px;
-                padding: 8px;
-                margin-top: 10px;
-                margin-bottom: 10px;
-            }
-            QStatusBar {
-                background-color: #e0e0e0;
-                color: #333333;
+                padding: 4px;
+                margin-top: 8px;
+                margin-bottom: 8px;
             }
             QPushButton {
                 border: none;
                 border-radius: 5px;
-                padding: 8px;
             }
-            QPushButton:hover {
-                background-color: #dddddd; /* Change color on hover */
+            QScrollBar:vertical {
+                background: #f0f0f0;
+                width: 10px;
+                margin: 20px 0 20px 0;
+            }
+            QScrollBar::handle:vertical {
+                background: #888;
+                border-radius: 20px;
+            }
+            QScrollBar::handle:vertical:hover {
+                background: #666;
+            }
+            QScrollBar::add-line:vertical {
+                background: none;
+            }
+            QScrollBar::sub-line:vertical {
+                background: none;
             }
         """)
 
         self.show()
 
-    def show_bookmarks_panel(self):
-        # Placeholder for bookmarks panel
-        pass
-
     def toggle_side_panel(self):
-        self.side_panel_toolbar.setVisible(not self.side_panel_toolbar.isVisible())
+        # Placeholder for side panel toggle
+        pass
 
     def go_to_home(self):
         self.browser.setUrl(QUrl('https://www.google.com/'))
@@ -139,12 +126,6 @@ class Window(QMainWindow):
     def update_AddressBar(self, url):
         self.URLBar.setText(url.toString())
         self.URLBar.setCursorPosition(0)
-
-    def loading_started(self):
-        self.status_bar.showMessage("Loading...")
-
-    def loading_finished(self):
-        self.status_bar.clearMessage()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

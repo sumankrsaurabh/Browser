@@ -12,7 +12,7 @@ class Window(QMainWindow):
         font = QFont()
         font.setFamily("Inter")  # Replace "YourCustomFont" with the actual font name
 
-        self.setWindowTitle("PythonGeeks Web Browser")
+        self.setWindowTitle("Safest Browser")
         self.setWindowIcon(QIcon("./assets/browser_icon.png"))
 
         self.browser = QWebEngineView()
@@ -72,39 +72,24 @@ class Window(QMainWindow):
             QToolBar {
                 background-color: #ffffff;
                 border: none;
-                spacing: 8px;
-                padding-left: 8px;
-                padding-right: 8px;
+                spacing: 0px;
+                padding-left: 16px;
+                padding-right: 16px;
             }
             QLineEdit {
                 background-color: transparent;
-                border: 1px solid #ccc;
-                border-radius: 8px;
-                padding: 4px;
-                margin-top: 8px;
-                margin-bottom: 8px;
+                border: 2px solid #ccc;
+                border-radius: 18px;
+                padding: 8px 16px;
+                margin-top: 4px;
+                margin-bottom: 4px;
+                margin-right: 16px;
+                margin-left: 8px;
+                font-size: 14px;
             }
             QPushButton {
                 border: none;
-                border-radius: 5px;
-            }
-            QScrollBar:vertical {
-                background: #f0f0f0;
-                width: 10px;
-                margin: 20px 0 20px 0;
-            }
-            QScrollBar::handle:vertical {
-                background: #888;
-                border-radius: 20px;
-            }
-            QScrollBar::handle:vertical:hover {
-                background: #666;
-            }
-            QScrollBar::add-line:vertical {
-                background: none;
-            }
-            QScrollBar::sub-line:vertical {
-                background: none;
+                border-radius: 24px;
             }
         """)
 

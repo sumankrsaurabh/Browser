@@ -1,19 +1,23 @@
-from PyQt5.QtWidgets import QMainWindow, QApplication, QToolBar, QAction, QLineEdit, QStatusBar, QLabel, QWidget, QVBoxLayout
+# PyQt5 imports
+from PyQt5.QtWidgets import QMainWindow, QApplication, QToolBar, QAction, QLineEdit, QStatusBar, QMenu, QVBoxLayout, QWidget, QPushButton, QSizePolicy
 from PyQt5.QtWebEngineWidgets import QWebEngineView
-from PyQt5.QtCore import QUrl, QSize
+from PyQt5.QtCore import QUrl, Qt
 from PyQt5.QtGui import QIcon
+# System import
 import sys
 
 class Window(QMainWindow):
     def __init__(self, *args, **kwargs):
         super(Window, self).__init__(*args, **kwargs)
 
-        self.setWindowTitle("Personal Browser")
+        self.setWindowTitle("PythonGeeks Web Browser")
         self.setWindowIcon(QIcon("./assets/browser_icon.png"))
 
         self.browser = QWebEngineView()
         self.browser.setUrl(QUrl('https://www.google.com'))
         self.browser.urlChanged.connect(self.update_AddressBar)
+        self.browser.loadStarted.connect(self.loading_started)
+        self.browser.loadFinished.connect(self.loading_finished)
         self.setCentralWidget(self.browser)
 
         self.status_bar = QStatusBar()
@@ -48,22 +52,80 @@ class Window(QMainWindow):
         self.URLBar.returnPressed.connect(lambda: self.go_to_URL(QUrl(self.URLBar.text())))
         self.navigation_bar.addWidget(self.URLBar)
 
-        self.addToolBarBreak()
+        # Create a toggle button for the side panel
+        self.toggle_button = QPushButton(QIcon("./assets/side_panel_icon.png"), "", self)
+        self.toggle_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.toggle_button.setCheckable(True)
+        self.toggle_button.clicked.connect(self.toggle_side_panel)
 
-        self.bookmarks_bar = QToolBar('Bookmarks Toolbar')
-        self.addToolBar(self.bookmarks_bar)
+        # Add the toggle button to the toolbar
+        self.navigation_bar.addWidget(self.toggle_button)
 
-        # Bookmarks
-        self.add_bookmark("Facebook", "https://www.facebook.com", "./assets/facebook_icon.png")
-        self.add_bookmark("LinkedIn", "https://www.linkedin.com", "./assets/linkedin_icon.png")
-        
+        # Create Bookmarks button
+        self.bookmarks_button = QPushButton("Bookmarks")
+        self.bookmarks_button.clicked.connect(self.show_bookmarks_panel)
+
+        # Layout for side panel
+        self.side_panel_layout = QVBoxLayout()
+        self.side_panel_layout.addWidget(self.bookmarks_button)
+
+        # Widget for side panel
+        self.side_panel_widget = QWidget()
+        self.side_panel_widget.setLayout(self.side_panel_layout)
+
+        # Create a new toolbar for the side panel
+        self.side_panel_toolbar = QToolBar('Side Panel')
+        self.side_panel_toolbar.addWidget(self.side_panel_widget)
+
+        # Add the side panel toolbar to the main window
+        self.addToolBar(Qt.RightToolBarArea, self.side_panel_toolbar)
+
+        # Initially hide the side panel
+        self.side_panel_toolbar.setVisible(False)
+
+        self.setStyleSheet("""
+            QMainWindow {
+                background-color: #f0f0f0;
+                font-family: Arial, sans-serif;
+            }
+            QToolBar {
+                background-color: #f0f0f0;
+                border: none;
+                spacing: 10px;
+            }
+            QToolBar::item {
+                padding: 0px;  /* Removed padding */
+            }
+            QLineEdit {
+                background-color: #ffffff;
+                border: 1px solid #ccc;
+                border-radius: 8px;
+                padding: 8px;
+                margin-top: 10px;
+                margin-bottom: 10px;
+            }
+            QStatusBar {
+                background-color: #e0e0e0;
+                color: #333333;
+            }
+            QPushButton {
+                border: none;
+                border-radius: 5px;
+                padding: 8px;
+            }
+            QPushButton:hover {
+                background-color: #dddddd; /* Change color on hover */
+            }
+        """)
+
         self.show()
 
-    def add_bookmark(self, name, url, icon_path):
-        bookmark_button = QAction(QIcon(icon_path), name, self)
-        bookmark_button.setStatusTip(f'Go to {name}')
-        bookmark_button.triggered.connect(lambda: self.go_to_URL(QUrl(url)))
-        self.bookmarks_bar.addAction(bookmark_button)
+    def show_bookmarks_panel(self):
+        # Placeholder for bookmarks panel
+        pass
+
+    def toggle_side_panel(self):
+        self.side_panel_toolbar.setVisible(not self.side_panel_toolbar.isVisible())
 
     def go_to_home(self):
         self.browser.setUrl(QUrl('https://www.google.com/'))
@@ -77,6 +139,12 @@ class Window(QMainWindow):
     def update_AddressBar(self, url):
         self.URLBar.setText(url.toString())
         self.URLBar.setCursorPosition(0)
+
+    def loading_started(self):
+        self.status_bar.showMessage("Loading...")
+
+    def loading_finished(self):
+        self.status_bar.clearMessage()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

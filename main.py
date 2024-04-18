@@ -1,4 +1,13 @@
-from PyQt5.QtWidgets import QMainWindow, QApplication, QToolBar, QAction, QLineEdit, QPushButton, QSizePolicy, QScrollBar
+from PyQt5.QtWidgets import (
+    QMainWindow,
+    QApplication,
+    QToolBar,
+    QAction,
+    QLineEdit,
+    QPushButton,
+    QSizePolicy,
+    QScrollBar,
+)
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QIcon, QFont
@@ -16,43 +25,45 @@ class Window(QMainWindow):
         self.setWindowIcon(QIcon("./assets/browser_icon.png"))
 
         self.browser = QWebEngineView()
-        self.browser.setUrl(QUrl('https://www.google.com'))
+        self.browser.setUrl(QUrl("https://www.google.com"))
         self.browser.urlChanged.connect(self.update_AddressBar)
         self.setCentralWidget(self.browser)
 
         self.status_bar = self.statusBar()
         self.status_bar.setVisible(False)
 
-        self.navigation_bar = QToolBar('Navigation Toolbar')
+        self.navigation_bar = QToolBar("Navigation Toolbar")
         self.navigation_bar.setMovable(False)  # Make the toolbar non-movable
         self.addToolBar(self.navigation_bar)
 
         back_button = QAction(QIcon("./assets/back_icon.png"), "Back", self)
-        back_button.setStatusTip('Go to previous page you visited')
+        back_button.setStatusTip("Go to previous page you visited")
         back_button.triggered.connect(self.browser.back)
         self.navigation_bar.addAction(back_button)
 
         refresh_button = QAction(QIcon("./assets/refresh_icon.png"), "Refresh", self)
-        refresh_button.setStatusTip('Refresh this page')
+        refresh_button.setStatusTip("Refresh this page")
         refresh_button.triggered.connect(self.browser.reload)
         self.navigation_bar.addAction(refresh_button)
 
         next_button = QAction(QIcon("./assets/next_icon.png"), "Next", self)
-        next_button.setStatusTip('Go to next page')
+        next_button.setStatusTip("Go to next page")
         next_button.triggered.connect(self.browser.forward)
         self.navigation_bar.addAction(next_button)
 
         home_button = QAction(QIcon("./assets/home_icon.png"), "Home", self)
-        home_button.setStatusTip('Go to home page (Google page)')
+        home_button.setStatusTip("Go to home page (Google page)")
         home_button.triggered.connect(self.go_to_home)
         self.navigation_bar.addAction(home_button)
 
         self.URLBar = QLineEdit()
-        self.URLBar.returnPressed.connect(lambda: self.go_to_URL(QUrl(self.URLBar.text())))
+        self.URLBar.returnPressed.connect(self.on_URLBar_returnPressed)
         self.navigation_bar.addWidget(self.URLBar)
 
         # Create a toggle button for the side panel
-        self.toggle_button = QPushButton(QIcon("./assets/side_panel_icon.png"), "", self)
+        self.toggle_button = QPushButton(
+            QIcon("./assets/side_panel_icon.png"), "", self
+        )
         self.toggle_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.toggle_button.setCheckable(True)
         self.toggle_button.clicked.connect(self.toggle_side_panel)
@@ -65,7 +76,8 @@ class Window(QMainWindow):
         self.navigation_bar.setFont(font)
 
         # Apply scrollbar styling
-        self.setStyleSheet("""
+        self.setStyleSheet(
+            """
             QMainWindow {
                 background-color: #ffffff;
             }
@@ -91,7 +103,8 @@ class Window(QMainWindow):
                 border: none;
                 border-radius: 24px;
             }
-        """)
+        """
+        )
 
         self.show()
 
@@ -100,17 +113,34 @@ class Window(QMainWindow):
         pass
 
     def go_to_home(self):
-        self.browser.setUrl(QUrl('https://www.google.com/'))
+        self.browser.setUrl(QUrl("https://www.google.com/"))
 
     def go_to_URL(self, url: QUrl):
-        if url.scheme() == '':
-            url.setScheme('https://')
+        if url.scheme() == "":
+            url.setScheme("https")
         self.browser.setUrl(url)
         self.update_AddressBar(url)
 
     def update_AddressBar(self, url):
         self.URLBar.setText(url.toString())
         self.URLBar.setCursorPosition(0)
+
+    def on_URLBar_returnPressed(self):
+        input_text = self.URLBar.text()
+        if "." in input_text and " " not in input_text:
+            url = QUrl(input_text)
+            if url.isValid():
+                self.go_to_URL(url)
+            else:
+                self.search_with_search_engine(input_text)
+        else:
+            self.search_with_search_engine(input_text)
+
+    def search_with_search_engine(self, term):
+        search_url = QUrl("https://www.google.com/search?q={}".format(term))
+        self.browser.setUrl(search_url)
+        self.update_AddressBar(search_url)
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

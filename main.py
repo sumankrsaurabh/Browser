@@ -6,12 +6,12 @@ from PyQt5.QtWidgets import (
     QLineEdit,
     QPushButton,
     QSizePolicy,
-    QScrollBar,
 )
 from PyQt5.QtWebEngineWidgets import QWebEngineView
-from PyQt5.QtCore import QUrl
+from PyQt5.QtCore import QUrl,QSize
 from PyQt5.QtGui import QIcon, QFont
 import sys
+
 
 class Window(QMainWindow):
     def __init__(self, *args, **kwargs):
@@ -36,24 +36,36 @@ class Window(QMainWindow):
         self.navigation_bar.setMovable(False)  # Make the toolbar non-movable
         self.addToolBar(self.navigation_bar)
 
-        back_button = QAction(QIcon("./assets/back_icon.png"), "Back", self)
-        back_button.setStatusTip("Go to previous page you visited")
-        back_button.triggered.connect(self.browser.back)
+        # Load png icons
+        back_icon = QIcon("./assets/back_icon.png")
+        refresh_icon = QIcon("./assets/refresh_icon.png")
+        next_icon = QIcon("./assets/next_icon.png")
+        home_icon = QIcon("./assets/home_icon.png")
+        side_panel_icon = QIcon("./assets/menu_icon.png")
+
+        # Create actions with png icons and set icon size
+        button_size = QSize(24, 24)
+
+        back_button = QAction(back_icon, "Back", self)
+        back_icon_actual = back_icon.actualSize(button_size)
+        back_button.setIcon(QIcon(back_icon.pixmap(back_icon_actual)))
+
+        refresh_button = QAction(refresh_icon, "Refresh", self)
+        refresh_icon_actual = refresh_icon.actualSize(button_size)
+        refresh_button.setIcon(QIcon(refresh_icon.pixmap(refresh_icon_actual)))
+
+        next_button = QAction(next_icon, "Next", self)
+        next_icon_actual = next_icon.actualSize(button_size)
+        next_button.setIcon(QIcon(next_icon.pixmap(next_icon_actual)))
+
+        home_button = QAction(home_icon, "Home", self)
+        home_icon_actual = home_icon.actualSize(button_size)
+        home_button.setIcon(QIcon(home_icon.pixmap(home_icon_actual)))
+
+        # Add actions to the toolbar
         self.navigation_bar.addAction(back_button)
-
-        refresh_button = QAction(QIcon("./assets/refresh_icon.png"), "Refresh", self)
-        refresh_button.setStatusTip("Refresh this page")
-        refresh_button.triggered.connect(self.browser.reload)
         self.navigation_bar.addAction(refresh_button)
-
-        next_button = QAction(QIcon("./assets/next_icon.png"), "Next", self)
-        next_button.setStatusTip("Go to next page")
-        next_button.triggered.connect(self.browser.forward)
         self.navigation_bar.addAction(next_button)
-
-        home_button = QAction(QIcon("./assets/home_icon.png"), "Home", self)
-        home_button.setStatusTip("Go to home page (Google page)")
-        home_button.triggered.connect(self.go_to_home)
         self.navigation_bar.addAction(home_button)
 
         self.URLBar = QLineEdit()
@@ -61,11 +73,10 @@ class Window(QMainWindow):
         self.navigation_bar.addWidget(self.URLBar)
 
         # Create a toggle button for the side panel
-        self.toggle_button = QPushButton(
-            QIcon("./assets/side_panel_icon.png"), "", self
-        )
+        self.toggle_button = QPushButton(side_panel_icon, "", self)
         self.toggle_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.toggle_button.setCheckable(True)
+        self.toggle_button.setIconSize(button_size)
         self.toggle_button.clicked.connect(self.toggle_side_panel)
 
         # Add the toggle button to the toolbar
@@ -78,21 +89,18 @@ class Window(QMainWindow):
         # Apply scrollbar styling
         self.setStyleSheet(
             """
-            QMainWindow {
-                background-color: #ffffff;
-            }
             QToolBar {
                 background-color: #ffffff;
                 border: none;
-                spacing: 0px;
-                padding-left: 16px;
-                padding-right: 16px;
+                spacing: 4px;
+                border-bottom: 0.5px solid #ccc;
+                padding: 2px;
             }
             QLineEdit {
                 background-color: transparent;
-                border: 2px solid #ccc;
-                border-radius: 18px;
-                padding: 8px 16px;
+                border: 1px solid #000000;
+                border-radius: 14px;
+                padding: 4px 16px;
                 margin-top: 4px;
                 margin-bottom: 4px;
                 margin-right: 16px;
@@ -101,7 +109,7 @@ class Window(QMainWindow):
             }
             QPushButton {
                 border: none;
-                border-radius: 24px;
+                padding: 8px 16px 8px 0px;
             }
         """
         )
